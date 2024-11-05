@@ -1,30 +1,34 @@
 package it.unibo.inner.impl;
 
-import java.util.ArrayList;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import it.unibo.inner.api.IterableWithPolicy;
 import it.unibo.inner.api.Predicate;
 
 public class IterableWithPolicyImpl<T> implements IterableWithPolicy<T>{
 
-    private List<T> array;
+    private final List<T> array;
     private Predicate<T> policy;
 
-    public IterableWithPolicyImpl(T[] input) {
-        this.array = new ArrayList<>(List.of(input));
-        policy = new Predicate<>() {
-            @Override
-            public boolean test(T elem) {
-                return true;
+    public IterableWithPolicyImpl(final T[] input) {
+        this(
+            input,
+            new Predicate<>() {
+                @Override
+                public boolean test(T elem) {
+                    return true;
+                }
             }
-        };
+        );
     }
 
     public IterableWithPolicyImpl(T[] input, Predicate<T> policy) {
-        this.array = new ArrayList<>(List.of(input));
-        this.policy = policy;
+        this.array = List.of(requireNonNull(input, "The array must not be null"));
+        this.policy = requireNonNull(policy, "The predicate must not be null");
     }
 
     private class PolicyIterator implements Iterator<T>{
@@ -33,10 +37,9 @@ public class IterableWithPolicyImpl<T> implements IterableWithPolicy<T>{
 
         public boolean hasNext() {
             while (position < array.size()) {
-                if (policy.test(array.get(position))) {
+                if (policy.test(array.get(position++))) {
                     return true;
                 }
-                position++;
             }
             return false;
         }
@@ -46,7 +49,7 @@ public class IterableWithPolicyImpl<T> implements IterableWithPolicy<T>{
             if (hasNext()) {
                 return array.get(position++);
             }
-            return null;
+            throw new NoSuchElementException("No other elements are avaible");
         }
 
     }
