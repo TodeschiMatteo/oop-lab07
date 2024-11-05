@@ -53,9 +53,19 @@ public final class Transformers {
      * @param <I> input elements type
      * @param <O> output elements type
      */
-    public static <I, O> List<O> transform(final Iterable<I> base, final Function<I, O> transformer) {
-        return null;
+
+    public static <I, O> List<O> transform(
+        final Iterable<I> base,
+        final Function<I, O> transformer
+    ) {
+        return flattenTransform(base, new Function<I, List<O>>() {
+            @Override
+            public List<O> call(final I input) {
+                return List.of(transformer.call(input));
+            }
+        });
     }
+
 
     /**
      * A function that takes an iterable of collections, and returns a flatten list of the elements of the inner
@@ -70,7 +80,7 @@ public final class Transformers {
      * @param <I> type of the collection elements
      */
     public static <I> List<? extends I> flatten(final Iterable<? extends Collection<? extends I>> base) {
-        return null;
+        return flattenTransform(base, Function.identity());
     }
 
     /**
@@ -86,8 +96,21 @@ public final class Transformers {
      * @return A list containing only the elements that passed the test
      * @param <I> elements type
      */
-    public static <I> List<I> select(final Iterable<I> base, final Function<I, Boolean> test) {
-        return null;
+    public static <I> List<I> select(
+        final Iterable<I> base,
+        final Function<I, Boolean> test
+    ) {
+        return flattenTransform(base, new Function<>() {
+            @Override
+            public Collection<I> call(final I input) {
+                if( test.call(input) ){
+                    return List.of(input);
+                }
+                else {
+                    return List.of();
+                }
+            }
+        });
     }
 
     /**
@@ -103,6 +126,11 @@ public final class Transformers {
      * @param <I> elements type
      */
     public static <I> List<I> reject(final Iterable<I> base, final Function<I, Boolean> test) {
-        return null;
+        return select(base, new Function<>() {
+            @Override
+            public Boolean call(final I input) {
+                return !test.call(input);
+            }
+        });
     }
 }
