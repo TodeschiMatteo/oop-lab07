@@ -1,2 +1,6 @@
 *.class
 *.gradle
+gradlew/
+gradlew
+gradlew.bat
+*.kts
